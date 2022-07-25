@@ -12,7 +12,20 @@ const totalLikes = (blogs) => {
 	}, 0);
 	return totalNumberOfLikes;
 };
+
+const favoriteBlog = (blogs) =>{
+	let bookWithHighestLikes = 0;
+    let bookIndex = 0;
+    blogs.forEach(element => {
+        if (element.likes > bookWithHighestLikes) {
+            bookIndex = blogs.indexOf(element)
+        }
+    });
+    return blogs[bookIndex]
+}
+
 module.exports = {
 	dummy,
 	totalLikes,
+	favoriteBlog
 };
