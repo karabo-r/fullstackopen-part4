@@ -1,4 +1,4 @@
-const http = require('http')
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
@@ -13,11 +13,15 @@ const blogSchema = new mongoose.Schema({
 
 const Blog = mongoose.model('Blog', blogSchema)
 
-const mongoUrl = 'mongodb://localhost/bloglist'
-mongoose.connect(mongoUrl)
+const mongoUrl = process.env.MONGO_URI
+mongoose.connect(mongoUrl).then(console.log('connected'))
 
 app.use(cors())
 app.use(express.json())
+
+app.get('/',(request, response)=>{
+    response.send('hello mom')
+})
 
 app.get('/api/blogs', (request, response) => {
   Blog
@@ -34,6 +38,7 @@ app.post('/api/blogs', (request, response) => {
     .save()
     .then(result => {
       response.status(201).json(result)
+      console.log('blog has been saved');
     })
 })
 
