@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const supertest = require("supertest");
 const Blog = require("../models/blog");
 const app = require("../app");
+const blog = require("../models/blog");
 
 const api = supertest(app);
 
@@ -56,6 +57,24 @@ describe("check individual blog", () => {
 		const blogId = response.body[0].id;
 		expect(blogId).toBeDefined();
 	}, 10000);
+
+	test("Verifying defualt likes is 0", async () => {
+		const BlogwithoutLikes = new Blog({
+			title: "test title",
+			author: "test author",
+			url: "test url",
+		});
+
+		await api
+			.post("/api/blogs")
+			.send(BlogwithoutLikes)
+			.expect(201)
+			.expect("Content-type", /application\/json/);
+
+		const blogs = await api.get("/api/blogs");
+		const lastBlog = blogs.body[1];
+		expect(lastBlog.likes).toEqual(0);
+	});
 });
 
 afterAll(() => {
