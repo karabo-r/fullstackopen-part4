@@ -20,20 +20,43 @@ beforeEach(async () => {
 	await newBlog.save();
 }, 10000);
 
-test("returns the correct amount of blog posts in the JSON format", async () => {
-	await api.get("/api/blogs")
-    .expect(200)
-    .expect('Content-type', /application\/json/)
+describe("test api methods", () => {
+	test("check get method", async () => {
+		await api
+			.get("/api/blogs")
+			.expect(200)
+			.expect("Content-type", /application\/json/);
 
-    const response = await api.get('/api/blogs')
-    expect(response.body).toHaveLength(initialBlogs.length)
-}, 10000);
+		const response = await api.get("/api/blogs");
+		expect(response.body).toHaveLength(initialBlogs.length);
+	}, 10000);
 
-test('Verifying the existence of id property', async ()=>{
-	const response = await api.get('/api/blogs')
-	const blogId = response.body[0].id
-	expect(blogId).toBeDefined()
-}, 10000)
+	test("check post method", async () => {
+		const newBlog = new Blog({
+			title: "test title",
+			author: "test author",
+			url: "test url",
+			likes: 123,
+		});
+
+		await api
+			.post("/api/blogs")
+			.send(newBlog)
+			.expect(201)
+			.expect("Content-type", /application\/json/);
+
+		const response = await api.get("/api/blogs");
+		expect(response.body).toHaveLength(initialBlogs.length + 1);
+	});
+});
+
+describe("check individual blog", () => {
+	test("Verifying the existence of id property", async () => {
+		const response = await api.get("/api/blogs");
+		const blogId = response.body[0].id;
+		expect(blogId).toBeDefined();
+	}, 10000);
+});
 
 afterAll(() => {
 	mongoose.connection.close();
