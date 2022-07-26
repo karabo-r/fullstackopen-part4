@@ -4,9 +4,15 @@ const mongoose = require("mongoose");
 mongoose.connect(config.MONGO_URI).then(console.log("connected to database"));
 
 const blogSchema = new mongoose.Schema({
-	title: String,
+	title: {
+		type: String,
+		required: true
+	},
 	author: String,
-	url: String,
+	url: {
+		type: String,
+		required: true
+	},
 	likes: Number,
 });
 

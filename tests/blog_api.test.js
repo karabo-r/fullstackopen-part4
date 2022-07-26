@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const supertest = require("supertest");
 const Blog = require("../models/blog");
 const app = require("../app");
-const blog = require("../models/blog");
 
 const api = supertest(app);
 
@@ -74,6 +73,33 @@ describe("check individual blog", () => {
 		const blogs = await api.get("/api/blogs");
 		const lastBlog = blogs.body[1];
 		expect(lastBlog.likes).toEqual(0);
+	});
+
+	describe("Title and url properties are missing respond with 400", () => {
+		test("title missing", async () => {
+			const BlogwithoutTitle = new Blog({
+				author: "test author",
+				url: "test url",
+				likes: 12,
+			});
+
+			api
+			.post('/api/blogs')
+			.send(BlogwithoutTitle)
+			.expect(400)
+		});
+		test("url missing", async () => {
+			const BlogwithoutUrl = new Blog({
+				title: 'test title',
+				author: "test author",
+				likes: 12,
+			});
+
+			api
+			.post('/api/blogs')
+			.send(BlogwithoutUrl)
+			.expect(400)
+		});
 	});
 });
 
