@@ -10,7 +10,7 @@ const initialBlogs = [
 		title: "The great war of 1812",
 		author: "John Smith",
 		url: "url example",
-		likes: 43,
+		likes: 1,
 	},
 ];
 
@@ -48,6 +48,26 @@ describe("test api methods", () => {
 		const response = await api.get("/api/blogs");
 		expect(response.body).toHaveLength(initialBlogs.length + 1);
 	});
+
+	test('check put method', async () =>{
+		const newLikes = {
+			likes: initialBlogs[0].likes + 1
+		}
+
+		const originalBlog = await api.get('/api/blogs')
+		const originalBlogId = originalBlog.body[0].id
+
+		await api
+			.put(`/api/blogs/${originalBlogId}`)
+			.send(newLikes)
+			.expect(200)
+		
+		const updatedBlog = await api.get('/api/blogs')
+		const updatedBlogLikes = updatedBlog.body[0].likes
+		
+		expect(updatedBlogLikes).not.toEqual(initialBlogs[0].likes)
+
+	}, 100000)
 
 	test('check delete method', async ()=>{
 		const response = await api.get('/api/blogs')
