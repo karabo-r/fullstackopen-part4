@@ -20,4 +20,9 @@ BlogRouter.post("/", async (request, response) => {
 	console.log("blog has been saved");
 });
 
+BlogRouter.delete("/:id", async (request, response)=>{
+	await Blog.findByIdAndRemove(request.params.id)
+	response.status(204).end()
+})
+
 module.exports = BlogRouter

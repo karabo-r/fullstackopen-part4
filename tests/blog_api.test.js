@@ -48,6 +48,15 @@ describe("test api methods", () => {
 		const response = await api.get("/api/blogs");
 		expect(response.body).toHaveLength(initialBlogs.length + 1);
 	});
+
+	test('check delete method', async ()=>{
+		const response = await api.get('/api/blogs')
+		const id = response.body[0].id
+
+		api
+		.delete(`/api/blogs/${id}`)
+		.expect(204)
+	})
 });
 
 describe("check individual blog", () => {
