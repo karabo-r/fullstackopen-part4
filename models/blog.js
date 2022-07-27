@@ -1,17 +1,14 @@
-const config = require("../utils/config");
 const mongoose = require("mongoose");
-
-mongoose.connect(config.MONGO_URI).then(console.log("connected to database"));
 
 const blogSchema = new mongoose.Schema({
 	title: {
 		type: String,
-		required: true
+		required: true,
 	},
 	author: String,
 	url: {
 		type: String,
-		required: true
+		required: true,
 	},
 	likes: Number,
 });
