@@ -51,6 +51,20 @@ describe("check error handling", () => {
 				"User validation failed: username: a username is required",
 			);
 		});
+
+		test("test that username should be equal or greater than 3 characters", async () => {
+			const newUser = {
+				username: "te",
+				name: "test-name",
+				password: "test-password",
+			};
+
+			const result = await api.post("/api/users").send(newUser).expect(400);
+
+			expect(result.text).toContain(
+				"User validation failed: username: username should be longer than 3 characters",
+			);
+		});
 	});
 
 	describe("password", () => {

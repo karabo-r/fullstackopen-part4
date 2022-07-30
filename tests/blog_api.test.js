@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const Blog = require("../models/blog");
+
 const app = require("../app");
 
 const api = supertest(app);
@@ -14,13 +15,14 @@ const initialBlogs = [
 	},
 ];
 
+
 beforeEach(async () => {
 	await Blog.deleteMany({});
 	let newBlog = new Blog(initialBlogs[0]);
 	await newBlog.save();
 }, 10000);
 
-describe("test api methods", () => {
+describe("test api methods - /blogs", () => {
 	test("check get method", async () => {
 		await api
 			.get("/api/blogs")
@@ -79,7 +81,7 @@ describe("test api methods", () => {
 	})
 });
 
-describe("check individual blog", () => {
+describe("check individual blog - /blogs", () => {
 	test("Verifying the existence of id property", async () => {
 		const response = await api.get("/api/blogs");
 		const blogId = response.body[0].id;
@@ -131,6 +133,7 @@ describe("check individual blog", () => {
 		});
 	});
 });
+
 
 afterAll(() => {
 	mongoose.connection.close();
