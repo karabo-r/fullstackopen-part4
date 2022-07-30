@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+	blogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Blog" }],
 	username: {
 		type: String,
 		minLength: [3, "username should be longer than 3 characters"],
