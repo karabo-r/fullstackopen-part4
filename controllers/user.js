@@ -2,6 +2,7 @@ const UserRouter = require("express").Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
+// get all users 
 UserRouter.get("/", async (request, response) => {
 	const AllUsersInDb = await User.find({}).populate("blogs", {
 		url: 1,
@@ -11,8 +12,10 @@ UserRouter.get("/", async (request, response) => {
 	response.json(AllUsersInDb);
 });
 
+// create a new user
 UserRouter.post("/", async (request, response, next) => {
 	try {
+		await User.deleteMany({})
 		const { username, name } = request.body;
 		let password = request.body.password;
 		let passwordHash = "";
@@ -26,6 +29,8 @@ UserRouter.post("/", async (request, response, next) => {
 			name,
 			password: passwordHash,
 		});
+
+
 
 		const savedUser = await newUser.save();
 		response.status(201).json(savedUser);
