@@ -1,84 +1,51 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const Blog = require("../models/blog");
+const User = require("../models/user");
 
 const app = require("../app");
-
 const api = supertest(app);
 
-const initialBlogs = [
-	{
-		title: "The great war of 1812",
-		author: "John Smith",
-		url: "url example",
-		likes: 1,
-	},
-];
+const initialBlogs = {
+	title: "The great war of 1812",
+	author: "John Smith",
+	url: "url example",
+	likes: 1,
+};
 
+const initialUser = {
+	username: "test-username",
+	name: "test-name",
+	password: "test-password",
+};
 
 beforeEach(async () => {
 	await Blog.deleteMany({});
-	let newBlog = new Blog(initialBlogs[0]);
-	await newBlog.save();
+	await User.deleteMany({});
 }, 10000);
 
-describe("test api methods - /blogs", () => {
-	test("check get method", async () => {
-		await api
+describe("test api methods /blogs", () => {
+	test("get all blogs", async () => {
+		api
 			.get("/api/blogs")
 			.expect(200)
 			.expect("Content-type", /application\/json/);
-
-		const response = await api.get("/api/blogs");
-		expect(response.body).toHaveLength(initialBlogs.length);
-	}, 10000);
-
-	test("check post method", async () => {
-		const newBlog = new Blog({
-			title: "test title",
-			author: "test author",
-			url: "test url",
-			likes: 123,
-		});
-
-		await api
-			.post("/api/blogs")
-			.send(newBlog)
-			.expect(201)
-			.expect("Content-type", /application\/json/);
-
-		const response = await api.get("/api/blogs");
-		expect(response.body).toHaveLength(initialBlogs.length + 1);
 	});
 
-	test('check put method', async () =>{
-		const newLikes = {
-			likes: initialBlogs[0].likes + 1
-		}
-
-		const originalBlog = await api.get('/api/blogs')
-		const originalBlogId = originalBlog.body[0].id
-
+	test("create a blog", async () => {
+		// create user
+		await api.post("/api/users").send(initialUser);
+		//login as user to get token
+		const loginUser = await api.post("/api/login").send(initialUser);
+		const userToken = `bearer ${loginUser.body.token}`;
+		// create a blog as the user using token
 		await api
-			.put(`/api/blogs/${originalBlogId}`)
-			.send(newLikes)
-			.expect(200)
-		
-		const updatedBlog = await api.get('/api/blogs')
-		const updatedBlogLikes = updatedBlog.body[0].likes
-		
-		expect(updatedBlogLikes).not.toEqual(initialBlogs[0].likes)
-
-	}, 100000)
-
-	test('check delete method', async ()=>{
-		const response = await api.get('/api/blogs')
-		const id = response.body[0].id
-
-		api
-		.delete(`/api/blogs/${id}`)
-		.expect(204)
-	})
+			.post("/api/blogs")
+			.send(initialBlogs)
+			.set("Authorization", userToken)
+			.expect(201)
+			.expect("Content-type", /application\/json/);
+	});
 });
 
 describe("check individual blog - /blogs", () => {
@@ -114,26 +81,19 @@ describe("check individual blog - /blogs", () => {
 				likes: 12,
 			});
 
-			api
-			.post('/api/blogs')
-			.send(BlogwithoutTitle)
-			.expect(400)
+			api.post("/api/blogs").send(BlogwithoutTitle).expect(400);
 		});
 		test("url missing", async () => {
 			const BlogwithoutUrl = new Blog({
-				title: 'test title',
+				title: "test title",
 				author: "test author",
 				likes: 12,
 			});
 
-			api
-			.post('/api/blogs')
-			.send(BlogwithoutUrl)
-			.expect(400)
+			api.post("/api/blogs").send(BlogwithoutUrl).expect(400);
 		});
 	});
 });
-
 
 afterAll(() => {
 	mongoose.connection.close();
