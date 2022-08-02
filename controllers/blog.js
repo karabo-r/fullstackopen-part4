@@ -1,29 +1,20 @@
-require('dotenv').config()
+require("dotenv").config();
 const BlogRouter = require("express").Router();
 const Blog = require("../models/blog");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-
-const getUserToken = (request) => {
-	const Authorization = request.get("Authorization");
-	if (Authorization && Authorization.toLowerCase().startsWith("bearer ")) {
-		return Authorization.substring(7);
-	}
-	return null;
-};
 
 BlogRouter.get("/", async (request, response) => {
 	const blogs = await Blog.find({});
 	response.json(blogs);
 });
 
-BlogRouter.post("/", async (request, response) => {
-	await Blog.deleteMany({})
+BlogRouter.post("/", async (request, response, next) => {
+	await Blog.deleteMany({});
 	const data = request.body;
-	const token = getUserToken(request)
-	const decodedToken = jwt.verify(token, process.env.TOKEN_KEY)
+	const decodedToken = jwt.verify(request.token, process.env.TOKEN_KEY);
 	if (!decodedToken.id) {
-		return response.status(401).json({ error: 'token missing or invalid' })
+		return response.status(401).json({ error: "token missing or invalid" });
 	}
 	const user = await User.findById(decodedToken.id);
 	const newBlog = new Blog({

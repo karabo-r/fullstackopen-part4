@@ -15,21 +15,6 @@ const userSchema = new mongoose.Schema({
 	},
 });
 
-// userSchema.statics.isUsernameInUse = async function(username){
-// 	if(!username) throw new Error('Invalid username')
-// 	try {
-// 		const user = await this.findOne({username: username});
-// 		if (user) {
-// 			// console.log(user);
-// 			this.message = new Error('nonoooo')
-// 			return false;
-// 		}
-// 	} catch (error) {
-// 		// console.log("method error - isUsernameInUse", error);
-// 		return true;
-// 	}
-// };
-
 userSchema.set("toJSON", {
 	transform: (document, returnedObject) => {
 		(returnedObject.id = returnedObject._id.toString()),
