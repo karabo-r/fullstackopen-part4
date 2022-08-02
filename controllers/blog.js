@@ -1,8 +1,6 @@
-require("dotenv").config();
 const BlogRouter = require("express").Router();
 const Blog = require("../models/blog");
 const User = require("../models/user");
-const jwt = require("jsonwebtoken");
 
 BlogRouter.get("/", async (request, response) => {
 	const blogs = await Blog.find({});
@@ -11,14 +9,14 @@ BlogRouter.get("/", async (request, response) => {
 
 BlogRouter.post("/", async (request, response, next) => {
 	await Blog.deleteMany({});
-	const data = request.body;
-	const decodedToken = jwt.verify(request.token, process.env.TOKEN_KEY);
-	if (!decodedToken.id) {
+	const data = await request.body;
+	const user = await request.user
+	if (!user) {
 		return response.status(401).json({ error: "token missing or invalid" });
 	}
-	const user = await User.findById(decodedToken.id);
+	const currentUser = await User.findById(user);
 	const newBlog = new Blog({
-		user: user._id,
+		user: user,
 		title: data.title,
 		author: data.author,
 		url: data.url,
@@ -26,24 +24,24 @@ BlogRouter.post("/", async (request, response, next) => {
 	});
 
 	const result = await newBlog.save();
-	user.blogs.push(newBlog._id);
-	await user.save();
+	currentUser.blogs.push(newBlog._id);
+	await currentUser.save();
 
 	response.status(201).json(result);
 	console.log("blog has been saved");
 });
 
 BlogRouter.delete("/:id", async (request, response) => {
-	const decodedToken = jwt.verify(request.token, process.env.TOKEN_KEY);
-	if (!decodedToken.id) {
+	const user = request.user
+	if (!user) {
 		return response.status(401).json({ error: "token missing or invalid" });
 	}
 
 	const blog = await Blog.findById(request.params.id);
-	if (blog.user.toString() === decodedToken.id.toString()) {
+	if (blog.user.toString() === user) {
 		await blog.delete();
-		console.log("blog has been deleted");
 		response.status(204).end();
+		console.log("blog has been deleted");
 	}else{
 		response.status(404).send({message: 'error - you are not the user who create this note'})
 	}
